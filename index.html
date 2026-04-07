@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <div class="bg"></div>
+
+  <!-- Hotspots -->
+  <div class="hotspot" id="hs-weather"   data-panel="weather">
+    <span class="hs-label">Weather &amp; News</span>
+  </div>
+  <div class="hotspot" id="hs-calendar"  data-panel="calendar">
+    <span class="hs-label">Calendar</span>
+  </div>
+  <div class="hotspot" id="hs-todo"      data-panel="todo">
+    <span class="hs-label">To&#8209;Do</span>
+  </div>
+  <div class="hotspot" id="hs-portfolio" data-panel="portfolio">
+    <span class="hs-label">Portfolio</span>
+  </div>
+  <div class="hotspot" id="hs-quotes"    data-panel="quotes">
+    <span class="hs-label">Quotes &amp; Books</span>
+  </div>
+
+  <!-- Dim overlay -->
+  <div id="overlay"></div>
+
+  <!-- Weather & News Panel -->
+  <div class="panel" id="panel-weather">
+    <button class="close-btn" aria-label="Close">&#x2715;</button>
+    <h2 class="panel-title">Weather &amp; News <span class="panel-sub">Berkeley, CA</span></h2>
+    <div class="panel-body" id="body-weather"><div class="skeleton-block"></div></div>
+  </div>
+
+  <!-- Calendar Panel -->
+  <div class="panel" id="panel-calendar">
+    <button class="close-btn" aria-label="Close">&#x2715;</button>
+    <h2 class="panel-title">Calendar</h2>
+    <div class="panel-body" id="body-calendar"><div class="skeleton-block"></div></div>
+  </div>
+
+  <!-- To-Do Panel -->
+  <div class="panel" id="panel-todo">
+    <button class="close-btn" aria-label="Close">&#x2715;</button>
+    <h2 class="panel-title">To&#8209;Do</h2>
+    <div class="panel-body" id="body-todo"><div class="skeleton-block"></div></div>
+  </div>
+
+  <!-- Portfolio Panel -->
+  <div class="panel" id="panel-portfolio">
+    <button class="close-btn" aria-label="Close">&#x2715;</button>
+    <h2 class="panel-title">Portfolio</h2>
+    <div class="panel-body" id="body-portfolio"><div class="skeleton-block"></div></div>
+  </div>
+
+  <!-- Quotes & Books Panel -->
+  <div class="panel" id="panel-quotes">
+    <button class="close-btn" aria-label="Close">&#x2715;</button>
+    <h2 class="panel-title">Quotes &amp; Books</h2>
+    <div class="panel-body" id="body-quotes"><div class="skeleton-block"></div></div>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
