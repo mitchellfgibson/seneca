@@ -51,8 +51,9 @@ const CONFIG = {
 
   // ── Static Books (used if BOOKS_SHEET_ID is empty) ────────────────────────
   BOOKS: [
-    // { title: 'The Power of Habit', author: 'Charles Duhigg', status: 'read' },
-    // { title: 'Thinking, Fast and Slow', author: 'Daniel Kahneman', status: 'reading' },
+    { title: 'The Sun Also Rises', author: 'Ernest Hemingway', status: 'reading', pages: 251 },
+    { title: 'The Stranger',       author: 'Albert Camus',     status: 'reading', pages: 123 },
+    { title: 'Steppenwolf',        author: 'Hermann Hesse',    status: 'reading', pages: 237 },
   ],
 
   // ── Custom Quotes (mixed into the random rotation) ─────────────────────────

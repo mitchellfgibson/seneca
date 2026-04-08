@@ -572,25 +572,60 @@ async function loadQuotes() {
     wireNewQuoteBtn();
     loadBooks();
   } else if (CONFIG.BOOKS && CONFIG.BOOKS.length) {
-    html += CONFIG.BOOKS.map(function(b) {
-      return [
-        '<div class="book-item">',
-          '<div class="book-cover">' + (b.cover ? '<img src="' + b.cover + '" alt="">' : '') + '</div>',
-          '<div>',
-            '<div class="book-title">' + b.title + '</div>',
-            '<div class="book-author">' + (b.author || '') + '</div>',
-            '<span class="book-status' + (b.status === 'read' ? ' read' : '') + '">' + (b.status || 'reading') + '</span>',
-          '</div>',
-        '</div>',
-      ].join('');
-    }).join('');
+    html += '<div id="books-content"></div>';
     setBody('quotes', html);
     wireNewQuoteBtn();
+    renderBooks();
   } else {
     html += '<p class="msg-empty">Add books to <code>config.js</code> or a Google Sheet.</p>';
     setBody('quotes', html);
     wireNewQuoteBtn();
   }
+}
+
+function bookPagesKey(title) { return 'book_page_' + title.replace(/\s+/g, '_'); }
+
+function renderBooks() {
+  var el = document.getElementById('books-content');
+  if (!el) return;
+
+  el.innerHTML = CONFIG.BOOKS.map(function(b) {
+    var savedPage = parseInt(localStorage.getItem(bookPagesKey(b.title)) || '0');
+    var pct = b.pages ? Math.min(100, Math.round((savedPage / b.pages) * 100)) : null;
+    var isDone = pct === 100;
+
+    return [
+      '<div class="book-item" data-title="' + b.title + '">',
+        '<div class="book-cover">' + (b.cover ? '<img src="' + b.cover + '" alt="">' : '') + '</div>',
+        '<div class="book-info">',
+          '<div class="book-title">' + b.title + '</div>',
+          '<div class="book-author">' + (b.author || '') + '</div>',
+          b.pages ? [
+            '<div class="book-progress-row">',
+              '<div class="book-progress-bar"><div class="book-progress-fill" style="width:' + pct + '%"></div></div>',
+              '<button class="book-page-btn" data-title="' + b.title + '" data-pages="' + b.pages + '">',
+                isDone ? '100%' : (savedPage ? savedPage + ' / ' + b.pages + ' p (' + pct + '%)' : 'Add page'),
+              '</button>',
+            '</div>',
+          ].join('') : '',
+        '</div>',
+      '</div>',
+    ].join('');
+  }).join('');
+
+  // Wire page buttons
+  el.querySelectorAll('.book-page-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var title = btn.dataset.title;
+      var pages = parseInt(btn.dataset.pages);
+      var current = parseInt(localStorage.getItem(bookPagesKey(title)) || '0');
+      var input = prompt('Page you\'re on for "' + title + '" (out of ' + pages + '):', current || '');
+      if (input === null) return;
+      var page = Math.max(0, Math.min(pages, parseInt(input) || 0));
+      localStorage.setItem(bookPagesKey(title), page);
+      renderBooks();
+    });
+  });
 }
 
 function wireNewQuoteBtn() {
