@@ -449,10 +449,8 @@ async function loadPortfolio() {
     var totalNetNum = totalNetPct ? parseFloat(totalNetPct) : null;
     var totalCls = totalNetNum !== null ? (totalNetNum >= 0 ? 'up' : 'down') : '';
     var dayCls   = dayNetVal !== null ? (dayNetVal >= 0 ? 'up' : 'down') : '';
-    // P/L = Current Value (n7) - Total Cost Basis (n6), excludes cash
-    var cashRow = positions.find(function(p) { return p.cash; });
-    var cashVal = cashRow ? cashRow.price : 0;
-    var plDollar = (currentVal && totalCost) ? ((currentVal - cashVal) - totalCost) : null;
+    // Current Value from sheet already excludes cash, so P/L is straightforward
+    var plDollar = (currentVal && totalCost) ? (currentVal - totalCost) : null;
 
     var html = '<div class="port-summary">';
     if (currentVal)  html += '<div class="port-stat"><div class="port-stat-val">$' + currentVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div><div class="port-stat-lbl">Value</div></div>';
