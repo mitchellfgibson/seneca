@@ -634,5 +634,63 @@ async function loadBooks() {
   });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SECRET MODE — click dead space, type "mitchell"
+// ─────────────────────────────────────────────────────────────────────────────
+var secretMode = false;
+var secretListening = false;
+var secretTyped = '';
+var secretTarget = 'mitchell';
+var secretTimer = null;
+
+document.addEventListener('click', function(e) {
+  // Only activate listening on dead space (bg or body, not hotspots/panels/overlay)
+  var tag = e.target;
+  if (tag.closest('.hotspot') || tag.closest('.panel') || tag.id === 'overlay') return;
+  if (secretMode) return;
+
+  secretListening = true;
+  secretTyped = '';
+  clearTimeout(secretTimer);
+  // Stop listening after 3 seconds of no typing
+  secretTimer = setTimeout(function() {
+    secretListening = false;
+    secretTyped = '';
+  }, 3000);
+});
+
+document.addEventListener('keydown', function(e) {
+  if (!secretListening || secretMode) return;
+  if (e.key.length !== 1) return; // ignore shift, ctrl, etc.
+
+  secretTyped += e.key.toLowerCase();
+
+  // Keep only the last N chars matching target length
+  if (secretTyped.length > secretTarget.length) {
+    secretTyped = secretTyped.slice(-secretTarget.length);
+  }
+
+  if (secretTyped === secretTarget) {
+    secretListening = false;
+    clearTimeout(secretTimer);
+    activateSecretMode();
+  }
+});
+
+function activateSecretMode() {
+  secretMode = true;
+  var bg = document.querySelector('.bg');
+
+  // Fade out
+  bg.style.transition = 'opacity 0.8s ease';
+  bg.style.opacity = '0';
+
+  setTimeout(function() {
+    bg.style.backgroundImage = "url('assets/horses.jpg')";
+    // Fade in
+    bg.style.opacity = '1';
+  }, 800);
+}
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 initGoogleAuth();
