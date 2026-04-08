@@ -832,29 +832,8 @@ async function showAssignmentsCard() {
   setTimeout(function() { card.classList.add('visible'); }, 50);
 
   try {
-    var token = CONFIG.BCOURSES_TOKEN;
-    var courseIds = CONFIG.BCOURSES_COURSE_IDS || [];
-
-    // Fetch course names + assignments in parallel
-    var courseResults = await Promise.all(courseIds.map(async function(id) {
-      var [cResp, aResp] = await Promise.all([
-        fetch('https://bcourses.berkeley.edu/api/v1/courses/' + id, { headers: { Authorization: 'Bearer ' + token } }),
-        fetch('https://bcourses.berkeley.edu/api/v1/courses/' + id + '/assignments?bucket=upcoming&per_page=20', { headers: { Authorization: 'Bearer ' + token } }),
-      ]);
-      var course = await cResp.json();
-      var assignments = await aResp.json();
-      return { course: course, assignments: assignments };
-    }));
-
-    // Flatten + sort by due date
-    var all = [];
-    courseResults.forEach(function(r) {
-      var shortName = (r.course.course_code || r.course.name || '').split(' ').slice(0,3).join(' ');
-      (r.assignments || []).forEach(function(a) {
-        if (a.due_at) all.push({ name: a.name, due: new Date(a.due_at), course: shortName });
-      });
-    });
-    all.sort(function(a, b) { return a.due - b.due; });
+    var r = await fetch('https://script.google.com/macros/s/AKfycbyZCo-Rk5G5LIVynx3vRaGiua48fQj17hj0zJ71vxDBbJvY5oAqcIMyhuT_UM8OY68dZw/exec');
+    var all = (await r.json()).map(function(a) { return { name: a.name, due: new Date(a.due), course: a.course }; });
 
     if (!all.length) { card.innerHTML = '<div class="padres-header"><div class="padres-title">Assignments</div></div><p style="font-size:13px;color:#999">No upcoming assignments</p>'; return; }
 
