@@ -725,11 +725,22 @@ async function showPadresCard() {
   try {
     var today = new Date().toISOString().slice(0, 10);
     var monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    var r = await fetch(
-      'https://statsapi.mlb.com/api/v1/schedule?teamId=135&season=2026&gameType=R&sportId=1' +
-      '&startDate=' + monthAgo + '&endDate=' + today
-    );
-    var data = await r.json();
+    var year = new Date().getFullYear();
+
+    var [schedResp, standResp] = await Promise.all([
+      fetch('https://statsapi.mlb.com/api/v1/schedule?teamId=135&season=' + year + '&gameType=R&sportId=1&startDate=' + monthAgo + '&endDate=' + today),
+      fetch('https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=' + year + '&standingsTypes=regularSeason'),
+    ]);
+    var data = await schedResp.json();
+    var standData = await standResp.json();
+
+    // Get record
+    var record = '';
+    (standData.records || []).forEach(function(div) {
+      (div.teamRecords || []).forEach(function(t) {
+        if (t.team.id === 135) record = t.wins + '-' + t.losses;
+      });
+    });
 
     // Flatten all final games, grab last 3
     var games = [];
@@ -742,7 +753,7 @@ async function showPadresCard() {
 
     if (!last3.length) { card.innerHTML = '<div class="padres-title">No recent games</div>'; return; }
 
-    var html = '<div class="padres-title">Padres</div>';
+    var html = '<div class="padres-header"><div class="padres-title">Padres</div>' + (record ? '<div class="padres-record">' + record + '</div>' : '') + '</div>';
     last3.forEach(function(g) {
       var away = g.teams.away;
       var home = g.teams.home;
