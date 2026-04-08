@@ -698,15 +698,76 @@ function activateSecretMode() {
   secretMode = true;
   var bg = document.querySelector('.bg');
 
-  // Fade out
   bg.style.transition = 'opacity 0.8s ease';
   bg.style.opacity = '0';
 
   setTimeout(function() {
     bg.style.backgroundImage = "url('assets/horses.jpg')";
-    // Fade in
     bg.style.opacity = '1';
+    showPadresCard();
   }, 800);
+}
+
+async function showPadresCard() {
+  // Create card if it doesn't exist
+  var card = document.getElementById('padres-card');
+  if (!card) {
+    card = document.createElement('div');
+    card.id = 'padres-card';
+    document.body.appendChild(card);
+  }
+  card.className = 'padres-card';
+  card.innerHTML = '<div class="padres-loading">Loading scores&hellip;</div>';
+
+  // Fade card in
+  setTimeout(function() { card.classList.add('visible'); }, 50);
+
+  try {
+    var today = new Date().toISOString().slice(0, 10);
+    var monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    var r = await fetch(
+      'https://statsapi.mlb.com/api/v1/schedule?teamId=135&season=2026&gameType=R&sportId=1' +
+      '&startDate=' + monthAgo + '&endDate=' + today
+    );
+    var data = await r.json();
+
+    // Flatten all final games, grab last 3
+    var games = [];
+    (data.dates || []).forEach(function(d) {
+      d.games.forEach(function(g) {
+        if (g.status.detailedState === 'Final') games.push(g);
+      });
+    });
+    var last3 = games.slice(-3).reverse();
+
+    if (!last3.length) { card.innerHTML = '<div class="padres-title">No recent games</div>'; return; }
+
+    var html = '<div class="padres-title">Padres</div>';
+    last3.forEach(function(g) {
+      var away = g.teams.away;
+      var home = g.teams.home;
+      var isPadresHome = home.team.id === 135;
+      var padres = isPadresHome ? home : away;
+      var opp    = isPadresHome ? away : home;
+      var won    = padres.score > opp.score;
+      var dateStr = new Date(g.gameDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+      html += [
+        '<div class="padres-game">',
+          '<div class="padres-result ' + (won ? 'padres-w' : 'padres-l') + '">' + (won ? 'W' : 'L') + '</div>',
+          '<div class="padres-info">',
+            '<div class="padres-opponent">' + (isPadresHome ? 'vs' : '@') + ' ' + opp.team.name + '</div>',
+            '<div class="padres-date">' + dateStr + '</div>',
+          '</div>',
+          '<div class="padres-score">' + padres.score + ' &ndash; ' + opp.score + '</div>',
+        '</div>',
+      ].join('');
+    });
+
+    card.innerHTML = html;
+  } catch(e) {
+    card.innerHTML = '<div class="padres-title">Could not load scores</div>';
+  }
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
