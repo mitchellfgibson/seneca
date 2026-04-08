@@ -459,7 +459,7 @@ async function loadPortfolio() {
     var html = '<div class="port-summary">';
     if (currentVal) {
       var valStr = '$' + currentVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-      var totalStr = totalWithCash ? ' ($' + totalWithCash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' w/ cash)' : '';
+      var totalStr = totalWithCash ? ' ($' + totalWithCash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ')' : '';
       html += '<div class="port-stat port-stat-wide"><div class="port-stat-val">' + valStr + '<span class="port-cash-total">' + totalStr + '</span></div><div class="port-stat-lbl">Value</div></div>';
     }
     if (totalCost)   html += '<div class="port-stat"><div class="port-stat-val">$' + totalCost.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div><div class="port-stat-lbl">Cost Basis</div></div>';
