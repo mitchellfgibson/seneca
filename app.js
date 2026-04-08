@@ -452,8 +452,16 @@ async function loadPortfolio() {
     // Current Value from sheet already excludes cash, so P/L is straightforward
     var plDollar = (currentVal && totalCost) ? (currentVal - totalCost) : null;
 
+    var cashRow = positions.find(function(p) { return p.cash; });
+    var cashVal = cashRow ? cashRow.price : 0;
+    var totalWithCash = currentVal ? currentVal + cashVal : null;
+
     var html = '<div class="port-summary">';
-    if (currentVal)  html += '<div class="port-stat"><div class="port-stat-val">$' + currentVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div><div class="port-stat-lbl">Value</div></div>';
+    if (currentVal) {
+      var valStr = '$' + currentVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+      var totalStr = totalWithCash ? ' ($' + totalWithCash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ' w/ cash)' : '';
+      html += '<div class="port-stat port-stat-wide"><div class="port-stat-val">' + valStr + '<span class="port-cash-total">' + totalStr + '</span></div><div class="port-stat-lbl">Value</div></div>';
+    }
     if (totalCost)   html += '<div class="port-stat"><div class="port-stat-val">$' + totalCost.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div><div class="port-stat-lbl">Cost Basis</div></div>';
     if (plDollar !== null) html += '<div class="port-stat"><div class="port-stat-val ' + totalCls + '">' + (plDollar >= 0 ? '+' : '') + '$' + Math.abs(plDollar).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div><div class="port-stat-lbl">Total P/L</div></div>';
     if (totalNetPct) html += '<div class="port-stat"><div class="port-stat-val ' + totalCls + '">' + totalNetPct + '</div><div class="port-stat-lbl">Total %</div></div>';
