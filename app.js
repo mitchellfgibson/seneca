@@ -272,22 +272,33 @@ function calColor(id) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TO-DO (localStorage)
+// TO-DO (Google Apps Script backend)
 // ─────────────────────────────────────────────────────────────────────────────
-function todoLoad() {
-  try { return JSON.parse(localStorage.getItem('todos') || '[]'); } catch { return []; }
+var TODO_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxP7VQIrWgc7OwxKgToU8-WYadOWtGP023lohySzYbGW-fM4tobnQ9DOjm1g-BfCwvc/exec';
+var todoCache = null;
+
+async function todoFetch() {
+  var r = await fetch(TODO_SCRIPT_URL + '?action=get');
+  todoCache = await r.json();
+  return todoCache;
 }
 
-function todoSave(todos) {
-  localStorage.setItem('todos', JSON.stringify(todos));
+async function todoSync(todos) {
+  todoCache = todos;
+  await fetch(TODO_SCRIPT_URL + '?action=save&todos=' + encodeURIComponent(JSON.stringify(todos)));
 }
 
-function loadTodo() {
-  renderTodo();
+async function loadTodo() {
+  setBody('todo', skeleton());
+  try {
+    var todos = await todoFetch();
+    renderTodo(todos);
+  } catch(e) {
+    setBody('todo', errorMsg('Could not load todos: ' + e.message));
+  }
 }
 
-function renderTodo() {
-  var todos = todoLoad();
+function renderTodo(todos) {
   var active    = todos.filter(function(t) { return !t.done; });
   var completed = todos.filter(function(t) { return t.done; });
 
@@ -311,45 +322,41 @@ function renderTodo() {
 
   setBody('todo', html);
 
-  // Wire add
-  var input = document.getElementById('todo-input');
+  var input  = document.getElementById('todo-input');
   var addBtn = document.getElementById('todo-add-btn');
 
-  function addTask() {
+  async function addTask() {
     var text = input.value.trim();
     if (!text) return;
-    var todos = todoLoad();
+    input.value = '';
+    var todos = (todoCache || []).slice();
     todos.unshift({ id: Date.now(), text: text, done: false, doneAt: null });
-    todoSave(todos);
-    renderTodo();
-    // Re-focus input after re-render
-    var newInput = document.getElementById('todo-input');
-    if (newInput) newInput.focus();
+    renderTodo(todos);
+    await todoSync(todos);
   }
 
   addBtn.addEventListener('click', addTask);
   input.addEventListener('keydown', function(e) { if (e.key === 'Enter') addTask(); });
 
-  // Wire check & delete buttons
   document.querySelectorAll('.todo-check-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', async function() {
       var id = parseInt(btn.dataset.id);
-      var todos = todoLoad();
+      var todos = (todoCache || []).slice();
       var t = todos.find(function(x) { return x.id === id; });
       if (!t) return;
       t.done = !t.done;
       t.doneAt = t.done ? new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
-      todoSave(todos);
-      renderTodo();
+      renderTodo(todos);
+      await todoSync(todos);
     });
   });
 
   document.querySelectorAll('.todo-del-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', async function() {
       var id = parseInt(btn.dataset.id);
-      var todos = todoLoad().filter(function(x) { return x.id !== id; });
-      todoSave(todos);
-      renderTodo();
+      var todos = (todoCache || []).filter(function(x) { return x.id !== id; });
+      renderTodo(todos);
+      await todoSync(todos);
     });
   });
 }
