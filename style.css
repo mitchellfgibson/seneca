@@ -427,7 +427,7 @@ html, body {
 .port-table { width: 100%; }
 .port-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 1fr 0.8fr 1fr 1fr 1fr;
   gap: 8px;
   align-items: center;
   padding: 9px 0;

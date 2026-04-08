@@ -462,11 +462,11 @@ async function loadPortfolio() {
     // Positions
     html += '<div class="section-label">Positions</div>';
     html += '<div class="port-table">';
-    html += '<div class="port-row port-header"><span>Ticker</span><span>Price</span><span>Day</span><span>Net P/L</span><span>$P/L</span></div>';
+    html += '<div class="port-row port-header"><span>Ticker</span><span>Price</span><span>Shares</span><span>Day</span><span>Net P/L</span><span>$P/L</span></div>';
 
     positions.forEach(function(p) {
       if (p.cash) {
-        html += '<div class="port-row"><span class="port-ticker">Cash</span><span>$' + p.price.toFixed(2) + '</span><span></span><span></span><span></span></div>';
+        html += '<div class="port-row"><span class="port-ticker">Cash</span><span>$' + p.price.toFixed(2) + '</span><span></span><span></span><span></span><span></span></div>';
         return;
       }
       var dayCls2  = p.dayDelta  >= 0 ? 'up' : 'down';
@@ -480,6 +480,7 @@ async function loadPortfolio() {
             '<div class="port-co">' + p.company + '</div>',
           '</span>',
           '<span>$' + p.price.toFixed(2) + '</span>',
+          '<span>' + (p.shares || '—') + '</span>',
           '<span class="' + dayCls2 + '">' + (p.dayDelta >= 0 ? '+' : '') + p.dayDelta + '%</span>',
           '<span class="' + netCls + '">' + p.netDelta + '</span>',
           '<span class="' + profCls + '">' + profStr + '</span>',
