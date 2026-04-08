@@ -740,6 +740,7 @@ function activateSecretMode() {
     bg.style.backgroundImage = "url('assets/horses.jpg')";
     bg.style.opacity = '1';
     showPadresCard();
+    showAssignmentsCard();
   }, 800);
 }
 
@@ -813,6 +814,68 @@ async function showPadresCard() {
     card.innerHTML = html;
   } catch(e) {
     card.innerHTML = '<div class="padres-title">Could not load scores</div>';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BCOURSES ASSIGNMENTS CARD (secret mode)
+// ─────────────────────────────────────────────────────────────────────────────
+async function showAssignmentsCard() {
+  var card = document.getElementById('assignments-card');
+  if (!card) {
+    card = document.createElement('div');
+    card.id = 'assignments-card';
+    document.body.appendChild(card);
+  }
+  card.className = 'padres-card assignments-card';
+  card.innerHTML = '<div class="padres-loading">Loading assignments&hellip;</div>';
+  setTimeout(function() { card.classList.add('visible'); }, 50);
+
+  try {
+    var token = CONFIG.BCOURSES_TOKEN;
+    var courseIds = CONFIG.BCOURSES_COURSE_IDS || [];
+
+    // Fetch course names + assignments in parallel
+    var courseResults = await Promise.all(courseIds.map(async function(id) {
+      var [cResp, aResp] = await Promise.all([
+        fetch('https://bcourses.berkeley.edu/api/v1/courses/' + id, { headers: { Authorization: 'Bearer ' + token } }),
+        fetch('https://bcourses.berkeley.edu/api/v1/courses/' + id + '/assignments?bucket=upcoming&per_page=20', { headers: { Authorization: 'Bearer ' + token } }),
+      ]);
+      var course = await cResp.json();
+      var assignments = await aResp.json();
+      return { course: course, assignments: assignments };
+    }));
+
+    // Flatten + sort by due date
+    var all = [];
+    courseResults.forEach(function(r) {
+      var shortName = (r.course.course_code || r.course.name || '').split(' ').slice(0,3).join(' ');
+      (r.assignments || []).forEach(function(a) {
+        if (a.due_at) all.push({ name: a.name, due: new Date(a.due_at), course: shortName });
+      });
+    });
+    all.sort(function(a, b) { return a.due - b.due; });
+
+    if (!all.length) { card.innerHTML = '<div class="padres-header"><div class="padres-title">Assignments</div></div><p style="font-size:13px;color:#999">No upcoming assignments</p>'; return; }
+
+    var html = '<div class="padres-header"><div class="padres-title">Assignments</div></div>';
+    all.forEach(function(a) {
+      var daysLeft = Math.ceil((a.due - Date.now()) / (1000 * 60 * 60 * 24));
+      var urgent = daysLeft <= 2;
+      html += [
+        '<div class="assignment-item">',
+          '<div class="assignment-info">',
+            '<div class="assignment-name">' + a.name + '</div>',
+            '<div class="assignment-course">' + a.course + '</div>',
+          '</div>',
+          '<div class="assignment-due' + (urgent ? ' urgent' : '') + '">' + (daysLeft === 0 ? 'Today' : daysLeft === 1 ? 'Tomorrow' : 'in ' + daysLeft + 'd') + '</div>',
+        '</div>',
+      ].join('');
+    });
+
+    card.innerHTML = html;
+  } catch(e) {
+    card.innerHTML = '<div class="padres-title">Could not load assignments</div>';
   }
 }
 

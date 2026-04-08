@@ -658,3 +658,31 @@ html, body {
 }
 
 .padres-loading { font-size: 13px; color: #999; }
+
+/* === Assignments Card (secret mode) === */
+.assignments-card {
+  top: 40px;
+  right: 340px;
+  min-width: 300px;
+}
+
+.assignment-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.assignment-item:last-child { border-bottom: none; }
+.assignment-info { flex: 1; min-width: 0; }
+.assignment-name { font-size: 13px; font-weight: 600; color: #111; line-height: 1.4; }
+.assignment-course { font-size: 11px; color: #999; margin-top: 2px; }
+.assignment-due {
+  font-size: 11px;
+  font-weight: 700;
+  color: #555;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+.assignment-due.urgent { color: #c0392b; }

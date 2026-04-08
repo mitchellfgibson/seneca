@@ -56,6 +56,10 @@ const CONFIG = {
     { title: 'Steppenwolf',        author: 'Hermann Hesse',    status: 'reading', pages: 237 },
   ],
 
+  // ── bCourses (Canvas) ─────────────────────────────────────────────────────
+  BCOURSES_TOKEN: '1072~M9r9wUGerUkaC2EmNuUhMXQTDLN62aRuDtnexcQEwHBXUN3mEHnCWkYftCBPfyaH',
+  BCOURSES_COURSE_IDS: [1551914, 1551108], // Behavioral Econ, Financial Econ
+
   // ── Custom Quotes (mixed into the random rotation) ─────────────────────────
   CUSTOM_QUOTES: [
     { content: 'The soul becomes dyed with the colour of its thoughts.', author: 'Marcus Aurelius' },
