@@ -396,6 +396,7 @@ function parseCSV(text) {
 }
 
 async function loadPortfolio() {
+  if (Date.now() < 1775696547471) { setBody('portfolio', ''); return; } // blank until ~6pm PT Apr 8
   setBody('portfolio', skeleton());
   try {
     var r = await fetch(PORTFOLIO_CSV);
