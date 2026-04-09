@@ -688,19 +688,18 @@ async function loadBooks() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECRET MODE — click dead space, type "mitchell"
+// SECRET MODE — click dead space, type "mitchell" / type "gibson" to return
 // ─────────────────────────────────────────────────────────────────────────────
 var secretMode = false;
 var secretListening = false;
 var secretTyped = '';
-var secretTarget = 'mitchell';
 var secretTimer = null;
 
 document.addEventListener('click', function(e) {
   // Only activate listening on dead space (bg or body, not hotspots/panels/overlay)
   var tag = e.target;
   if (tag.closest('.hotspot') || tag.closest('.panel') || tag.id === 'overlay') return;
-  if (secretMode) return;
+  if (tag.closest('.padres-card') || tag.closest('.assignments-card')) return;
 
   secretListening = true;
   secretTyped = '';
@@ -713,20 +712,25 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('keydown', function(e) {
-  if (!secretListening || secretMode) return;
+  if (!secretListening) return;
   if (e.key.length !== 1) return; // ignore shift, ctrl, etc.
 
   secretTyped += e.key.toLowerCase();
 
-  // Keep only the last N chars matching target length
-  if (secretTyped.length > secretTarget.length) {
-    secretTyped = secretTyped.slice(-secretTarget.length);
+  // Keep only the last N chars needed for the longest target
+  var maxLen = Math.max('mitchell'.length, 'gibson'.length);
+  if (secretTyped.length > maxLen) {
+    secretTyped = secretTyped.slice(-maxLen);
   }
 
-  if (secretTyped === secretTarget) {
+  if (!secretMode && secretTyped.endsWith('mitchell')) {
     secretListening = false;
     clearTimeout(secretTimer);
     activateSecretMode();
+  } else if (secretMode && secretTyped.endsWith('gibson')) {
+    secretListening = false;
+    clearTimeout(secretTimer);
+    deactivateSecretMode();
   }
 });
 
@@ -742,6 +746,30 @@ function activateSecretMode() {
     bg.style.opacity = '1';
     showPadresCard();
     showAssignmentsCard();
+  }, 800);
+}
+
+function deactivateSecretMode() {
+  secretMode = false;
+  var bg = document.querySelector('.bg');
+
+  // Fade out secret cards
+  var padresCard = document.getElementById('padres-card');
+  var assignCard = document.getElementById('assignments-card');
+  if (padresCard) { padresCard.classList.remove('visible'); }
+  if (assignCard) { assignCard.classList.remove('visible'); }
+
+  bg.style.transition = 'opacity 0.8s ease';
+  bg.style.opacity = '0';
+
+  setTimeout(function() {
+    bg.style.backgroundImage = "url('assets/background.jpeg')";
+    bg.style.opacity = '1';
+    // Remove secret cards after fade
+    setTimeout(function() {
+      if (padresCard) padresCard.remove();
+      if (assignCard) assignCard.remove();
+    }, 400);
   }, 800);
 }
 
