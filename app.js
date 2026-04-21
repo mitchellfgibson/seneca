@@ -122,7 +122,6 @@ async function loadWeather() {
   var newsResult    = results[1];
   var html = '';
 
-  // Weather block
   if (weatherResult.status === 'fulfilled') {
     var w = weatherResult.value;
     var icon = 'https://openweathermap.org/img/wn/' + w.weather[0].icon + '@2x.png';
@@ -145,11 +144,9 @@ async function loadWeather() {
     html += errorMsg('Could not load weather.');
   }
 
-  // Markets block (loads async after render)
   html += '<div class="section-label">Markets</div>';
   html += '<div id="market-rows"><div class="market-row"><span class="market-name" style="color:rgba(255,255,255,0.3)">Loading&hellip;</span></div></div>';
 
-  // News block
   html += '<div class="section-label">Headlines</div>';
   if (newsResult.status === 'fulfilled' && newsResult.value && newsResult.value.results && newsResult.value.results.length) {
     newsResult.value.results.slice(0, 6).forEach(function(a) {
@@ -169,7 +166,7 @@ async function loadWeather() {
 
   setBody('weather', html);
   weatherCache = html;
-  loadMarkets(); // async, fills in #market-rows
+  loadMarkets();
 }
 
 async function fetchWeather() {
@@ -246,29 +243,6 @@ function loadCalendar() {
       ' frameborder="0" scrolling="no">',
     '</iframe>',
   ].join(''));
-}
-
-function formatDayLabel(dateStr) {
-  var d = new Date(dateStr + 'T12:00:00');
-  var today = new Date();
-  var tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
-  if (d.toDateString() === today.toDateString())    return 'Today';
-  if (d.toDateString() === tomorrow.toDateString()) return 'Tomorrow';
-  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
-}
-
-function formatTime(d) {
-  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-}
-
-function calColor(id) {
-  var colors = {
-    1:'#ac725e', 2:'#d06b64', 3:'#f83a22', 4:'#fa573c',
-    5:'#ff7537', 6:'#ffad46', 7:'#42d692', 8:'#16a765',
-    9:'#7bd148', 10:'#b3dc6c', 11:'#fbe983', 12:'#fad165'
-  };
-  return colors[id] || '#0a84ff';
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -396,14 +370,12 @@ function parseCSV(text) {
 }
 
 async function loadPortfolio() {
-  if (Date.now() < 1775696547471) { setBody('portfolio', ''); return; } // blank until ~6pm PT Apr 8
   setBody('portfolio', skeleton());
   try {
     var r = await fetch(PORTFOLIO_CSV);
     if (!r.ok) throw new Error('Could not load sheet');
     var rows = parseCSV(await r.text());
 
-    // Extract summary values by searching for known markers
     var costBasisRow = rows.find(function(r) { return r.indexOf('Total Cost Basis') !== -1; });
     var headerRow    = rows.find(function(r) { return r.indexOf('TICKER') !== -1; });
     var totalNetRow  = rows.find(function(r) { return r.indexOf('Total Net') !== -1; });
@@ -414,7 +386,6 @@ async function loadPortfolio() {
     var totalNetPct  = totalNetRow  ? totalNetRow[totalNetRow.indexOf('Total Net') + 1] : null;
     var dayNetVal    = dayNetRow    ? parseFloat(dayNetRow[dayNetRow.indexOf('Day Net') + 1]) : null;
 
-    // Positions: rows after header until blank ticker
     var headerIdx = rows.indexOf(headerRow);
     var positions = [];
     for (var i = headerIdx + 1; i < rows.length; i++) {
@@ -438,7 +409,6 @@ async function loadPortfolio() {
       });
     }
 
-    // Lot details (rows after "Lot details" marker)
     var lotIdx = rows.findIndex(function(r) { return r[1] === 'Lot details'; });
     var lots = {};
     if (lotIdx !== -1) {
@@ -453,11 +423,9 @@ async function loadPortfolio() {
       }
     }
 
-    // ── Render ───────────────────────────────────────────────────────────────
     var totalNetNum = totalNetPct ? parseFloat(totalNetPct) : null;
     var totalCls = totalNetNum !== null ? (totalNetNum >= 0 ? 'up' : 'down') : '';
     var dayCls   = dayNetVal !== null ? (dayNetVal >= 0 ? 'up' : 'down') : '';
-    // Current Value from sheet already excludes cash, so P/L is straightforward
     var plDollar = (currentVal && totalCost) ? (currentVal - totalCost) : null;
 
     var cashRow = positions.find(function(p) { return p.cash; });
@@ -468,7 +436,7 @@ async function loadPortfolio() {
     if (currentVal) {
       var valStr = '$' + currentVal.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
       var totalStr = totalWithCash ? ' ($' + totalWithCash.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + ')' : '';
-      html += '<div class="port-stat port-stat-wide"><div class="port-stat-val">' + valStr + '<span class="port-cash-total">' + totalStr + '</span></div></div>';
+      html += '<div class="port-stat port-stat-wide"><div class="port-stat-val">' + valStr + '<span class="port-cash-total">' + totalStr + '</span></div><div class="port-stat-lbl">Value</div></div>';
     }
     if (totalCost)   html += '<div class="port-stat"><div class="port-stat-val">$' + totalCost.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div><div class="port-stat-lbl">Cost Basis</div></div>';
     if (plDollar !== null) html += '<div class="port-stat"><div class="port-stat-val ' + totalCls + '">' + (plDollar >= 0 ? '+' : '') + '$' + Math.abs(plDollar).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) + '</div><div class="port-stat-lbl">Total P/L</div></div>';
@@ -476,7 +444,6 @@ async function loadPortfolio() {
     if (dayNetVal !== null) html += '<div class="port-stat"><div class="port-stat-val ' + dayCls + '">' + (dayNetVal >= 0 ? '+' : '') + dayNetVal + '%</div><div class="port-stat-lbl">Today</div></div>';
     html += '</div>';
 
-    // Positions
     html += '<div class="section-label">Positions</div>';
     html += '<div class="port-table">';
     html += '<div class="port-row port-header"><span>Ticker</span><span>Price</span><span>Shares</span><span>Day</span><span>Net P/L</span><span>$P/L</span></div>';
@@ -497,14 +464,13 @@ async function loadPortfolio() {
             '<div class="port-co">' + p.company + '</div>',
           '</span>',
           '<span>$' + p.price.toFixed(2) + '</span>',
-          '<span>' + (p.shares || '—') + '</span>',
+          '<span>' + (p.shares || '\u2013') + '</span>',
           '<span class="' + dayCls2 + '">' + (p.dayDelta >= 0 ? '+' : '') + p.dayDelta + '%</span>',
           '<span class="' + netCls + '">' + p.netDelta + '</span>',
           '<span class="' + profCls + '">' + profStr + '</span>',
         '</div>',
       ].join('');
 
-      // Lot details inline
       if (lots[p.ticker] && lots[p.ticker].length) {
         html += '<div class="lot-block" id="lots-' + p.ticker + '" style="display:none">';
         html += '<div class="lot-header"><span>Date</span><span>Shares</span><span>Cost</span><span>P/L</span><span>Days</span></div>';
@@ -521,7 +487,6 @@ async function loadPortfolio() {
     html += '</div>';
     setBody('portfolio', html);
 
-    // Toggle lot details on row click
     document.querySelectorAll('.port-row[data-ticker]').forEach(function(row) {
       var ticker = row.dataset.ticker;
       var lotBlock = document.getElementById('lots-' + ticker);
@@ -543,7 +508,6 @@ async function loadPortfolio() {
 async function loadQuotes() {
   var html = '';
 
-  // Quote of the day
   try {
     var q = quoteCache || await fetchRandomQuote();
     quoteCache = q;
@@ -555,7 +519,6 @@ async function loadQuotes() {
       '<button class="new-quote-btn" id="new-quote-btn">New quote</button>',
     ].join('');
   } catch (e) {
-    // Fallback quote
     html += [
       '<div class="quote-block">',
         '<div class="quote-text">&ldquo;The unexamined life is not worth living.&rdquo;</div>',
@@ -564,7 +527,6 @@ async function loadQuotes() {
     ].join('');
   }
 
-  // Books section
   html += '<div class="section-label">Reading</div>';
 
   if (CONFIG.BOOKS_SHEET_ID && CONFIG.GOOGLE_CLIENT_ID) {
@@ -614,7 +576,6 @@ function renderBooks() {
     ].join('');
   }).join('');
 
-  // Wire page buttons
   el.querySelectorAll('.book-page-btn').forEach(function(btn) {
     btn.addEventListener('click', function() {
       var title = btn.dataset.title;
@@ -639,7 +600,6 @@ function wireNewQuoteBtn() {
 
 async function fetchRandomQuote() {
   var custom = (CONFIG.CUSTOM_QUOTES && CONFIG.CUSTOM_QUOTES.length) ? CONFIG.CUSTOM_QUOTES : [];
-  // 50% chance to show a custom quote if any exist
   if (custom.length && Math.random() < 0.5) {
     return custom[Math.floor(Math.random() * custom.length)];
   }
@@ -688,7 +648,7 @@ async function loadBooks() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// SECRET MODE — click dead space, type "mitchell" / type "gibson" to return
+// SECRET MODE · click dead space, type "mitchell" / "gibson" to toggle
 // ─────────────────────────────────────────────────────────────────────────────
 var secretMode = false;
 var secretListening = false;
@@ -696,15 +656,13 @@ var secretTyped = '';
 var secretTimer = null;
 
 document.addEventListener('click', function(e) {
-  // Only activate listening on dead space (bg or body, not hotspots/panels/overlay)
   var tag = e.target;
-  if (tag.closest('.hotspot') || tag.closest('.panel') || tag.id === 'overlay') return;
+  if (tag.closest('.idx-item') || tag.closest('.hotspot') || tag.closest('.panel') || tag.id === 'overlay') return;
   if (tag.closest('.padres-card') || tag.closest('.assignments-card')) return;
 
   secretListening = true;
   secretTyped = '';
   clearTimeout(secretTimer);
-  // Stop listening after 3 seconds of no typing
   secretTimer = setTimeout(function() {
     secretListening = false;
     secretTyped = '';
@@ -713,15 +671,11 @@ document.addEventListener('click', function(e) {
 
 document.addEventListener('keydown', function(e) {
   if (!secretListening) return;
-  if (e.key.length !== 1) return; // ignore shift, ctrl, etc.
+  if (e.key.length !== 1) return;
 
   secretTyped += e.key.toLowerCase();
-
-  // Keep only the last N chars needed for the longest target
   var maxLen = Math.max('mitchell'.length, 'gibson'.length);
-  if (secretTyped.length > maxLen) {
-    secretTyped = secretTyped.slice(-maxLen);
-  }
+  if (secretTyped.length > maxLen) secretTyped = secretTyped.slice(-maxLen);
 
   if (!secretMode && secretTyped.endsWith('mitchell')) {
     secretListening = false;
@@ -737,154 +691,42 @@ document.addEventListener('keydown', function(e) {
 function activateSecretMode() {
   secretMode = true;
   var bg = document.querySelector('.bg');
+  var rainier = document.getElementById('rainier');
+  var mast = document.querySelector('.masthead');
+  var idx  = document.querySelector('.index');
+  var stat = document.querySelector('.status');
 
-  bg.style.transition = 'opacity 0.8s ease';
-  bg.style.opacity = '0';
+  if (bg) { bg.style.transition = 'opacity 0.8s ease'; bg.style.opacity = '0'; }
+  [mast, idx, stat].forEach(function(el) {
+    if (!el) return;
+    el.style.transition = 'opacity 0.5s ease';
+    el.style.opacity = '0';
+    el.style.pointerEvents = 'none';
+  });
 
-  setTimeout(function() {
-    bg.style.backgroundImage = "url('assets/horses.jpg')";
-    bg.style.opacity = '1';
-    showPadresCard();
-    showAssignmentsCard();
-  }, 800);
+  if (typeof buildRainier === 'function') buildRainier('rainier');
+  setTimeout(function() { if (rainier) rainier.classList.add('visible'); }, 350);
 }
 
 function deactivateSecretMode() {
   secretMode = false;
   var bg = document.querySelector('.bg');
+  var rainier = document.getElementById('rainier');
+  var mast = document.querySelector('.masthead');
+  var idx  = document.querySelector('.index');
+  var stat = document.querySelector('.status');
 
-  // Fade out secret cards
-  var padresCard = document.getElementById('padres-card');
-  var assignCard = document.getElementById('assignments-card');
-  if (padresCard) { padresCard.classList.remove('visible'); }
-  if (assignCard) { assignCard.classList.remove('visible'); }
-
-  bg.style.transition = 'opacity 0.8s ease';
-  bg.style.opacity = '0';
+  if (typeof hideElevCard === 'function') hideElevCard();
+  if (rainier) rainier.classList.remove('visible');
 
   setTimeout(function() {
-    bg.style.backgroundImage = "url('assets/background.jpeg')";
-    bg.style.opacity = '1';
-    // Remove secret cards after fade
-    setTimeout(function() {
-      if (padresCard) padresCard.remove();
-      if (assignCard) assignCard.remove();
-    }, 400);
-  }, 800);
-}
-
-async function showPadresCard() {
-  // Create card if it doesn't exist
-  var card = document.getElementById('padres-card');
-  if (!card) {
-    card = document.createElement('div');
-    card.id = 'padres-card';
-    document.body.appendChild(card);
-  }
-  card.className = 'padres-card';
-  card.innerHTML = '<div class="padres-loading">Loading scores&hellip;</div>';
-
-  // Fade card in
-  setTimeout(function() { card.classList.add('visible'); }, 50);
-
-  try {
-    var today = new Date().toISOString().slice(0, 10);
-    var monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    var year = new Date().getFullYear();
-
-    var [schedResp, standResp] = await Promise.all([
-      fetch('https://statsapi.mlb.com/api/v1/schedule?teamId=135&season=' + year + '&gameType=R&sportId=1&startDate=' + monthAgo + '&endDate=' + today),
-      fetch('https://statsapi.mlb.com/api/v1/standings?leagueId=104&season=' + year + '&standingsTypes=regularSeason'),
-    ]);
-    var data = await schedResp.json();
-    var standData = await standResp.json();
-
-    // Get record
-    var record = '';
-    (standData.records || []).forEach(function(div) {
-      (div.teamRecords || []).forEach(function(t) {
-        if (t.team.id === 135) record = t.wins + '-' + t.losses;
-      });
+    if (bg) bg.style.opacity = '1';
+    [mast, idx, stat].forEach(function(el) {
+      if (!el) return;
+      el.style.opacity = '';
+      el.style.pointerEvents = '';
     });
-
-    // Flatten all final games, grab last 3
-    var games = [];
-    (data.dates || []).forEach(function(d) {
-      d.games.forEach(function(g) {
-        if (g.status.detailedState === 'Final') games.push(g);
-      });
-    });
-    var last3 = games.slice(-3).reverse();
-
-    if (!last3.length) { card.innerHTML = '<div class="padres-title">No recent games</div>'; return; }
-
-    var html = '<div class="padres-header"><div class="padres-title">Padres</div>' + (record ? '<div class="padres-record">' + record + '</div>' : '') + '</div>';
-    last3.forEach(function(g) {
-      var away = g.teams.away;
-      var home = g.teams.home;
-      var isPadresHome = home.team.id === 135;
-      var padres = isPadresHome ? home : away;
-      var opp    = isPadresHome ? away : home;
-      var won    = padres.score > opp.score;
-      var dateStr = new Date(g.gameDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-      html += [
-        '<div class="padres-game">',
-          '<div class="padres-result ' + (won ? 'padres-w' : 'padres-l') + '">' + (won ? 'W' : 'L') + '</div>',
-          '<div class="padres-info">',
-            '<div class="padres-opponent">' + (isPadresHome ? 'vs' : '@') + ' ' + opp.team.name + '</div>',
-            '<div class="padres-date">' + dateStr + '</div>',
-          '</div>',
-          '<div class="padres-score">' + padres.score + ' &ndash; ' + opp.score + '</div>',
-        '</div>',
-      ].join('');
-    });
-
-    card.innerHTML = html;
-  } catch(e) {
-    card.innerHTML = '<div class="padres-title">Could not load scores</div>';
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// BCOURSES ASSIGNMENTS CARD (secret mode)
-// ─────────────────────────────────────────────────────────────────────────────
-async function showAssignmentsCard() {
-  var card = document.getElementById('assignments-card');
-  if (!card) {
-    card = document.createElement('div');
-    card.id = 'assignments-card';
-    document.body.appendChild(card);
-  }
-  card.className = 'padres-card assignments-card';
-  card.innerHTML = '<div class="padres-loading">Loading assignments&hellip;</div>';
-  setTimeout(function() { card.classList.add('visible'); }, 50);
-
-  try {
-    var r = await fetch('https://script.google.com/macros/s/AKfycbyZCo-Rk5G5LIVynx3vRaGiua48fQj17hj0zJ71vxDBbJvY5oAqcIMyhuT_UM8OY68dZw/exec');
-    var all = (await r.json()).map(function(a) { return { name: a.name, due: new Date(a.due), course: a.course }; });
-
-    if (!all.length) { card.innerHTML = '<div class="padres-header"><div class="padres-title">Assignments</div></div><p style="font-size:13px;color:#999">No upcoming assignments</p>'; return; }
-
-    var html = '<div class="padres-header"><div class="padres-title">Assignments</div></div>';
-    all.forEach(function(a) {
-      var daysLeft = Math.ceil((a.due - Date.now()) / (1000 * 60 * 60 * 24));
-      var urgent = daysLeft <= 2;
-      html += [
-        '<div class="assignment-item">',
-          '<div class="assignment-info">',
-            '<div class="assignment-name">' + a.name + '</div>',
-            '<div class="assignment-course">' + a.course + '</div>',
-          '</div>',
-          '<div class="assignment-due' + (urgent ? ' urgent' : '') + '">' + (daysLeft === 0 ? 'Today' : daysLeft === 1 ? 'Tomorrow' : 'in ' + daysLeft + 'd') + '</div>',
-        '</div>',
-      ].join('');
-    });
-
-    card.innerHTML = html;
-  } catch(e) {
-    card.innerHTML = '<div class="padres-title">Could not load assignments</div>';
-  }
+  }, 500);
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────

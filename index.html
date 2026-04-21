@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dashboard</title>
+  <title>Mitchell Gibson</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -11,63 +11,120 @@
 
   <div class="bg"></div>
 
-  <!-- Hotspots -->
-  <div class="hotspot" id="hs-weather"   data-panel="weather">
-    <span class="hs-label">Weather &amp; News</span>
-  </div>
-  <div class="hotspot" id="hs-calendar"  data-panel="calendar">
-    <span class="hs-label">Calendar</span>
-  </div>
-  <div class="hotspot" id="hs-todo"      data-panel="todo">
-    <span class="hs-label">To&#8209;Do</span>
-  </div>
-  <div class="hotspot" id="hs-portfolio" data-panel="portfolio">
-    <span class="hs-label">Portfolio</span>
-  </div>
-  <div class="hotspot" id="hs-quotes"    data-panel="quotes">
-    <span class="hs-label">Quotes &amp; Books</span>
+  <!-- ─── Masthead ─── -->
+  <div class="masthead">
+    <div>
+      <div class="brand">Mitchell <em>Gibson</em></div>
+      <div class="brand-sub">Carlsbad, CA · Est. 2004</div>
+    </div>
+    <div class="coords">
+      <div><strong>37.8716° N</strong></div>
+      <div><strong>122.2727° W</strong></div>
+      <div>Elevation 169 ft</div>
+    </div>
   </div>
 
-  <!-- Dim overlay -->
+  <!-- ─── Index (widget launcher) ─── -->
+  <div class="index">
+    <div class="index-title">Index</div>
+    <button class="idx-item" data-panel="weather">
+      <span class="idx-num">01</span>
+      <span class="idx-name">Weather &amp; News</span>
+      <span class="idx-meta">Berkeley</span>
+    </button>
+    <button class="idx-item" data-panel="calendar">
+      <span class="idx-num">02</span>
+      <span class="idx-name">Calendar</span>
+      <span class="idx-meta">Week</span>
+    </button>
+    <button class="idx-item" data-panel="todo">
+      <span class="idx-num">03</span>
+      <span class="idx-name">To&#8209;Do</span>
+      <span class="idx-meta">List</span>
+    </button>
+    <button class="idx-item" data-panel="portfolio">
+      <span class="idx-num">04</span>
+      <span class="idx-name">Portfolio</span>
+      <span class="idx-meta">Equities</span>
+    </button>
+    <button class="idx-item" data-panel="quotes">
+      <span class="idx-num">05</span>
+      <span class="idx-name">Quotes &amp; Books</span>
+      <span class="idx-meta">Reading</span>
+    </button>
+  </div>
+
+  <!-- ─── Status / clock ─── -->
+  <div class="status">
+    <div class="status-clock" id="clock">–:–</div>
+    <div id="clock-date">–</div>
+  </div>
+
+  <!-- ─── Dim overlay ─── -->
   <div id="overlay"></div>
 
-  <!-- Weather & News Panel -->
+  <!-- ─── Panels ─── -->
   <div class="panel" id="panel-weather">
-    <button class="close-btn" aria-label="Close">&#x2715;</button>
-    <h2 class="panel-title">Weather &amp; News <span class="panel-sub">Berkeley, CA</span></h2>
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Weather &amp; <em>News</em></div>
+        <div class="panel-sub">Berkeley, California · Updated live</div>
+      </div>
+      <button class="close-btn" aria-label="Close">✕</button>
+    </div>
     <div class="panel-body" id="body-weather"><div class="skeleton-block"></div></div>
   </div>
 
-  <!-- Calendar Panel -->
   <div class="panel" id="panel-calendar">
-    <button class="close-btn" aria-label="Close">&#x2715;</button>
-    <h2 class="panel-title">Calendar</h2>
+    <div class="panel-header">
+      <div>
+        <div class="panel-title"><em>Calendar</em></div>
+        <div class="panel-sub">Week view · America / Los Angeles</div>
+      </div>
+      <button class="close-btn" aria-label="Close">✕</button>
+    </div>
     <div class="panel-body" id="body-calendar"><div class="skeleton-block"></div></div>
   </div>
 
-  <!-- To-Do Panel -->
   <div class="panel" id="panel-todo">
-    <button class="close-btn" aria-label="Close">&#x2715;</button>
-    <h2 class="panel-title">To&#8209;Do</h2>
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">To&#8209;<em>Do</em></div>
+        <div class="panel-sub">Synced to Google Sheets</div>
+      </div>
+      <button class="close-btn" aria-label="Close">✕</button>
+    </div>
     <div class="panel-body" id="body-todo"><div class="skeleton-block"></div></div>
   </div>
 
-  <!-- Portfolio Panel -->
   <div class="panel" id="panel-portfolio">
-    <button class="close-btn" aria-label="Close">&#x2715;</button>
-    <h2 class="panel-title">Portfolio</h2>
+    <div class="panel-header">
+      <div>
+        <div class="panel-title"><em>Portfolio</em></div>
+        <div class="panel-sub">Equities · Live from sheet</div>
+      </div>
+      <button class="close-btn" aria-label="Close">✕</button>
+    </div>
     <div class="panel-body" id="body-portfolio"><div class="skeleton-block"></div></div>
   </div>
 
-  <!-- Quotes & Books Panel -->
   <div class="panel" id="panel-quotes">
-    <button class="close-btn" aria-label="Close">&#x2715;</button>
-    <h2 class="panel-title">Quotes &amp; Books</h2>
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Quotes &amp; <em>Books</em></div>
+        <div class="panel-sub">Reading log &amp; quote of the day</div>
+      </div>
+      <button class="close-btn" aria-label="Close">✕</button>
+    </div>
     <div class="panel-body" id="body-quotes"><div class="skeleton-block"></div></div>
   </div>
 
+  <!-- ─── Rainier secret-mode stage ─── -->
+  <div class="rainier-stage" id="rainier"></div>
+
   <script src="config.js"></script>
+  <script src="rainier.js"></script>
   <script src="app.js"></script>
+  <script src="bootstrap.js"></script>
 </body>
 </html>
-<!-- deployed Wed Apr  8 22:57:54 PDT 2026 -->
