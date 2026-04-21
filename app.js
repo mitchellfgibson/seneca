@@ -376,31 +376,39 @@ async function loadPortfolio() {
     if (!r.ok) throw new Error('Could not load sheet');
     var rows = parseCSV(await r.text());
 
-    var costBasisRow = rows.find(function(r) { return r.indexOf('Total Cost Basis') !== -1; });
-    var headerRow    = rows.find(function(r) { return r.indexOf('TICKER') !== -1; });
-    var totalNetRow  = rows.find(function(r) { return r.indexOf('Total Net') !== -1; });
-    var dayNetRow    = rows.find(function(r) { return r.indexOf('Day Net') !== -1; });
+    var costBasisRow  = rows.find(function(r) { return r.indexOf('Total Cost Basis') !== -1; });
+    var headerRow     = rows.find(function(r) { return r.indexOf('TICKER') !== -1; });
+    var currentValRow = rows.find(function(r) { return r.indexOf('Current Value') !== -1; });
+    var totalNetRow   = rows.find(function(r) { return r.indexOf('Total Net') !== -1; });
+    var dayNetRow     = rows.find(function(r) { return r.indexOf('Day Net') !== -1; });
 
-    var totalCost    = costBasisRow ? parseFloat(costBasisRow[costBasisRow.indexOf('Total Cost Basis') + 1]) : null;
-    var currentVal   = headerRow    ? parseFloat(headerRow[headerRow.indexOf('Current Value') + 1]) : null;
-    var totalNetPct  = totalNetRow  ? totalNetRow[totalNetRow.indexOf('Total Net') + 1] : null;
-    var dayNetVal    = dayNetRow    ? parseFloat(dayNetRow[dayNetRow.indexOf('Day Net') + 1]) : null;
+    var totalCost   = costBasisRow  ? parseFloat(costBasisRow[costBasisRow.indexOf('Total Cost Basis') + 1]) : null;
+    var currentVal  = currentValRow ? parseFloat(currentValRow[currentValRow.indexOf('Current Value') + 1]) : null;
+    var totalNetPct = totalNetRow   ? totalNetRow[totalNetRow.indexOf('Total Net') + 1] : null;
+    var dayNetVal   = dayNetRow     ? parseFloat(dayNetRow[dayNetRow.indexOf('Day Net') + 1]) : null;
 
+    // Positions: from header row up to the Lot details marker.
+    // Use continue (not break) on blank rows so we don't stop at the blank row after the header.
+    // Skip rows with unparseable prices (e.g. crypto #N/A entries).
+    var lotIdx = rows.findIndex(function(r) { return r[1] === 'Lot details'; });
     var headerIdx = rows.indexOf(headerRow);
+    var endIdx = lotIdx !== -1 ? lotIdx : rows.length;
     var positions = [];
-    for (var i = headerIdx + 1; i < rows.length; i++) {
+    for (var i = headerIdx + 1; i < endIdx; i++) {
       var row = rows[i];
       var ticker = row[2];
-      if (!ticker || ticker === 'Lot details') break;
+      if (!ticker) continue;
       if (ticker === 'Cash') {
         positions.push({ cash: true, price: parseFloat(row[4]) });
         continue;
       }
+      var price = parseFloat(row[4]);
+      if (isNaN(price)) continue; // skip #N/A crypto rows
       positions.push({
         size:      row[1],
         ticker:    ticker,
         company:   row[3],
-        price:     parseFloat(row[4]),
+        price:     price,
         costBasis: parseFloat(row[5]),
         dayDelta:  parseFloat(row[6]),
         shares:    parseInt(row[7]),
@@ -408,8 +416,6 @@ async function loadPortfolio() {
         totalProf: parseFloat(row[10]),
       });
     }
-
-    var lotIdx = rows.findIndex(function(r) { return r[1] === 'Lot details'; });
     var lots = {};
     if (lotIdx !== -1) {
       var curTicker = null;
