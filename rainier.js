@@ -134,6 +134,17 @@ function buildRainier(rootId) {
 
     <div class="rainier-footer"></div>
 
+    <div class="padres-card" id="padres-card">
+      <div class="padres-header">
+        <div>
+          <div class="padres-title">San Diego <em>Padres</em></div>
+          <div class="padres-record">Recent Results</div>
+        </div>
+        <button class="padres-close" id="padres-close">&#x2715;</button>
+      </div>
+      <div class="padres-body" id="padres-games"></div>
+    </div>
+
     <div class="elev-card" id="elev-card">
       <div class="elev-card-header">
         <div class="elev-card-elev" id="ec-elev"></div>
@@ -154,16 +165,27 @@ function buildRainier(rootId) {
   root.querySelectorAll('.elev-marker').forEach(el => {
     el.addEventListener('click', e => {
       e.stopPropagation();
-      showElevCard(el.dataset.id);
+      if (el.dataset.id === 'longmire') {
+        hideElevCard();
+        if (typeof showPadresCard === 'function') showPadresCard();
+      } else {
+        if (typeof hidePadresCard === 'function') hidePadresCard();
+        showElevCard(el.dataset.id);
+      }
     });
   });
 
   document.getElementById('ec-close').addEventListener('click', hideElevCard);
+  document.getElementById('padres-close').addEventListener('click', function() {
+    if (typeof hidePadresCard === 'function') hidePadresCard();
+  });
 
   root.addEventListener('click', e => {
     if (e.target.closest('.elev-marker')) return;
     if (e.target.closest('.elev-card')) return;
+    if (e.target.closest('.padres-card')) return;
     hideElevCard();
+    if (typeof hidePadresCard === 'function') hidePadresCard();
   });
 }
 

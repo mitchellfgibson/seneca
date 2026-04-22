@@ -723,6 +723,7 @@ function deactivateSecretMode() {
   var stat = document.querySelector('.status');
 
   if (typeof hideElevCard === 'function') hideElevCard();
+  hidePadresCard();
   if (rainier) rainier.classList.remove('visible');
 
   setTimeout(function() {
@@ -733,6 +734,71 @@ function deactivateSecretMode() {
       el.style.pointerEvents = '';
     });
   }, 500);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PADRES · last 3 game results (MLB Stats API, teamId=135)
+// ─────────────────────────────────────────────────────────────────────────────
+async function showPadresCard() {
+  var card = document.getElementById('padres-card');
+  if (!card) return;
+  card.classList.add('visible');
+  document.getElementById('padres-games').innerHTML = '<div class="padres-loading">Loading&hellip;</div>';
+
+  try {
+    var now = new Date();
+    var end = now.toISOString().slice(0, 10);
+    var start = new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    var url = 'https://statsapi.mlb.com/api/v1/schedule?teamId=135&gameType=R,S&startDate=' + start + '&endDate=' + end + '&sportId=1&hydrate=team';
+    var r = await fetch(url);
+    var data = await r.json();
+
+    var games = [];
+    (data.dates || []).forEach(function(d) {
+      (d.games || []).forEach(function(g) {
+        if (g.status && g.status.abstractGameState === 'Final') {
+          games.push({ date: d.date, game: g });
+        }
+      });
+    });
+    var last3 = games.slice(-3).reverse();
+
+    if (!last3.length) {
+      document.getElementById('padres-games').innerHTML = '<div class="padres-loading">No recent games found.</div>';
+      return;
+    }
+
+    document.getElementById('padres-games').innerHTML = last3.map(function(item) {
+      var g = item.game;
+      var home = g.teams.home;
+      var away = g.teams.away;
+      var isPadresHome = home.team.id === 135;
+      var padres = isPadresHome ? home : away;
+      var opp    = isPadresHome ? away : home;
+      var won    = padres.score > opp.score;
+      var dateStr = new Date(item.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase();
+      var venue  = isPadresHome ? 'HOME' : 'AWAY';
+
+      return [
+        '<div class="padres-game">',
+          '<div class="padres-result ' + (won ? 'padres-w' : 'padres-l') + '">' + (won ? 'W' : 'L') + '</div>',
+          '<div class="padres-info">',
+            '<div class="padres-opponent">' + opp.team.name + ' &middot; ' + venue + '</div>',
+            '<div class="padres-date">' + dateStr + '</div>',
+          '</div>',
+          '<div class="padres-score">' + padres.score + ' &ndash; ' + opp.score + '</div>',
+        '</div>',
+      ].join('');
+    }).join('');
+
+  } catch(e) {
+    document.getElementById('padres-games').innerHTML = '<div class="padres-loading">Could not load scores.</div>';
+  }
+}
+
+function hidePadresCard() {
+  var card = document.getElementById('padres-card');
+  if (card) card.classList.remove('visible');
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────

@@ -1003,3 +1003,120 @@ html, body {
   border-radius: 2px;
   letter-spacing: 0.18em;
 }
+
+/* ─── Padres card (Longmire easter egg) ────────────────────────────────────── */
+.padres-card {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -46%) scale(0.96);
+  width: min(380px, 88vw);
+  background: #f8f2e1;
+  border: 1.5px solid #8b1a1a;
+  z-index: 42;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+  color: #1a1713;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.25);
+}
+.padres-card.visible {
+  opacity: 1;
+  pointer-events: all;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.padres-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid rgba(139, 26, 26, 0.2);
+  background: #ece3ca;
+}
+.padres-title {
+  font-family: var(--serif);
+  font-size: 20px;
+  font-style: italic;
+  line-height: 1;
+  color: #1a1713;
+  letter-spacing: -0.01em;
+}
+.padres-title em { color: #8b1a1a; }
+.padres-record {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #7a6e5c;
+  margin-top: 5px;
+}
+.padres-close {
+  background: none; border: none;
+  font-family: var(--mono);
+  font-size: 16px;
+  color: #8b1a1a;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  transition: transform 0.2s;
+}
+.padres-close:hover { transform: rotate(90deg); }
+
+.padres-body { padding: 0 20px 4px; }
+
+.padres-game {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px dashed rgba(139, 26, 26, 0.2);
+}
+.padres-game:last-child { border-bottom: none; }
+
+.padres-result {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 28px;
+  width: 28px;
+  text-align: center;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.padres-w { color: #4a7a5a; }
+.padres-l { color: #8b1a1a; }
+
+.padres-info { flex: 1; min-width: 0; }
+.padres-opponent {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #1a1713;
+  margin-bottom: 4px;
+}
+.padres-date {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #7a6e5c;
+}
+
+.padres-score {
+  font-family: var(--serif);
+  font-size: 24px;
+  font-style: italic;
+  color: #1a1713;
+  letter-spacing: -0.01em;
+  flex-shrink: 0;
+}
+
+.padres-loading {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #7a6e5c;
+  padding: 22px 0;
+  text-align: center;
+}
