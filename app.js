@@ -747,11 +747,32 @@ async function showPadresCard() {
 
   try {
     var now = new Date();
+    var season = now.getFullYear();
     var end = now.toISOString().slice(0, 10);
     var start = new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    var url = 'https://statsapi.mlb.com/api/v1/schedule?teamId=135&gameType=R,S&startDate=' + start + '&endDate=' + end + '&sportId=1&hydrate=team';
-    var r = await fetch(url);
-    var data = await r.json();
+
+    var [schedRes, standRes] = await Promise.allSettled([
+      fetch('https://statsapi.mlb.com/api/v1/schedule?teamId=135&gameType=R,S&startDate=' + start + '&endDate=' + end + '&sportId=1&hydrate=team'),
+      fetch('https://statsapi.mlb.com/api/v1/standings?leagueId=103,104&season=' + season + '&standingsTypes=regularSeason'),
+    ]);
+
+    var r = schedRes.status === 'fulfilled' ? schedRes.value : null;
+    var data = r ? await r.json() : { dates: [] };
+
+    // Extract Padres W-L record from standings
+    var recordEl = document.getElementById('padres-record');
+    if (standRes.status === 'fulfilled') {
+      var standData = await standRes.value.json();
+      var padresEntry = null;
+      (standData.records || []).forEach(function(div) {
+        (div.teamRecords || []).forEach(function(tr) {
+          if (tr.team.id === 135) padresEntry = tr;
+        });
+      });
+      if (padresEntry && recordEl) {
+        recordEl.textContent = padresEntry.wins + '\u2013' + padresEntry.losses + ' \u00b7 ' + season;
+      }
+    }
 
     var games = [];
     (data.dates || []).forEach(function(d) {

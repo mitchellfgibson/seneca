@@ -138,7 +138,7 @@ function buildRainier(rootId) {
       <div class="padres-header">
         <div>
           <div class="padres-title">San Diego <em>Padres</em></div>
-          <div class="padres-record">Recent Results</div>
+          <div class="padres-record" id="padres-record">Recent Results</div>
         </div>
         <button class="padres-close" id="padres-close">&#x2715;</button>
       </div>
