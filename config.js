@@ -43,6 +43,7 @@ const CONFIG = {
   CUSTOM_QUOTES: [
     { content: 'The soul becomes dyed with the colour of its thoughts.', author: 'Marcus Aurelius' },
     { content: 'It is not death that a man should fear, but he should fear never beginning to live.', author: 'Marcus Aurelius' },
+    { content: 'I freed a thousand slaves. I could have freed a thousand more if only they knew they were slaves.', author: 'Harriet Tubman' },
   ],
 
 };
