@@ -45,6 +45,8 @@ const CONFIG = {
     { content: 'It is not death that a man should fear, but he should fear never beginning to live.', author: 'Marcus Aurelius' },
     { content: 'I freed a thousand slaves. I could have freed a thousand more if only they knew they were slaves.', author: 'Harriet Tubman' },
     { content: 'I can\'t go on. I\'ll go on.', author: 'Samuel Beckett' },
+    { content: 'Love is the expression of the one who loves, not of the one who is loved. Those who think they can love only the people they prefer do not love at all. Love discovers truths about individuals that others cannot see.', author: 'Søren Kierkegaard' },
+    { content: 'I am convinced that God is love, this thought has for me a primitive lyrical validity. When it is present to me, I am unspeakably blissful, when it is absent, I long for it more vehemently than does the lover for his object.', author: 'Søren Kierkegaard' },
   ],
 
 };
